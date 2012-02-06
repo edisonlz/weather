@@ -1,0 +1,269 @@
+
+<!DOCTYPE html> 
+<html> 
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="Access-Control-Allow-Origin" content="*">
+	<meta name="viewport" content="width=device-width, initial-scale=1"> 
+	<title>创意网尚-简单天气</title> 
+	<link rel="stylesheet" href="css/jquery.mobile-1.0.1.min.css" />
+	<script src="js/jquery-1.6.4.min.js"></script>
+	<script src="js/jquery.mobile-1.0.1.min.js"></script>
+	<script src="js/mustache.js"></script>
+	
+	<script type="text/javascript">
+	
+	
+	var _xml = '<?xml version="1.0"?><xml_api_reply version="1"><weather module_id="0" tab_id="0" mobile_row="0" mobile_zipped="1" row="0" section="0" ><forecast_information><city data="Beijing, Beijing"/><postal_code data="Beijing"/><latitude_e6 data=""/><longitude_e6 data=""/><forecast_date data="2012-01-31"/><current_date_time data="2012-01-31 22:30:00 +0000"/><unit_system data="SI"/></forecast_information><current_conditions><condition data="晴"/><temp_f data="28"/><temp_c data="-2"/><humidity data="湿度： 13%"/><icon data="/ig/images/weather/sunny.gif"/><wind_condition data="风向： 东北、风速：4 米/秒"/></current_conditions><forecast_conditions><day_of_week data="周二"/><low data="-15"/><high data="-1"/><icon data="/ig/images/weather/mostly_sunny.gif"/><condition data="以晴为主"/></forecast_conditions><forecast_conditions><day_of_week data="周三"/><low data="-14"/><high data="-3"/><icon data="/ig/images/weather/mostly_sunny.gif"/><condition data="以晴为主"/></forecast_conditions><forecast_conditions><day_of_week data="周四"/><low data="-13"/><high data="-2"/><icon data="/ig/images/weather/sunny.gif"/><condition data="晴"/></forecast_conditions><forecast_conditions><day_of_week data="周五"/><low data="-12"/><high data="1"/><icon data="/ig/images/weather/mostly_sunny.gif"/><condition data="以晴为主"/></forecast_conditions></weather></xml_api_reply>';
+	var weather_url = "http://www.google.com/ig/api?hl=zh-cn";
+
+	var city = {code: "cn",cities: [{name: "保定", lat: 38849998, lon: 115569999},{name: "北京", lat: 39930000, lon: 116279998, selected: true},{name: "沈阳", lat: 41770000, lon: 123430000},{name: "成都", lat: 30670000, lon: 104019996},{name: "大连", lat: 38900001, lon: 121629997},{name: "福州", lat: 26079999, lon: 119279998},{name: "阜阳", lat: 32930000, lon: 115830001},{name: "赣州", lat: 25850000, lon: 114949997},{name: "广州", lat: 23129999, lon: 113319999},{name: "贵阳", lat: 26579999, lon: 106720001},{name: "哈尔滨", lat: 45750000, lon: 126769996},{name: "海口", lat: 20030000, lon: 110349998},{name: "邯郸", lat: 38029998, lon: 114419998},{name: "杭州", lat: 30229999, lon: 120169998},{name: "合肥", lat: 31870000, lon: 117230003},{name: "菏泽", lat: 36119998, lon: 114370002},{name: "衡阳", lat: 36119998, lon: 114370002},{name: "呼和浩特", lat: 40819999, lon: 111680000},{name: "黄冈", lat: 30620000, lon: 114129997},{name: "济南", lat: 36680000, lon: 116980003},{name: "济宁", lat: 36680000, lon: 116980003},{name: "昆明", lat: 25020000, lon: 102680000},{name: "拉萨", lat: 29657589, lon: 91132050},{name: "兰州", lat: 36040000, lon: 103879997},{name: "南昌", lat: 28600000, lon: 115919998},{name: "南充", lat: 30799999, lon: 106080001},{name: "南京", lat: 32000000, lon: 118800003},{name: "南宁", lat: 22819999, lon: 108349998},{name: "南通", lat: 32000000, lon: 118800003},{name: "南阳", lat: 33029998, lon: 112580001},{name: "宁波", lat: 30229999, lon: 120169998},{name: "青岛", lat: 36069999, lon: 120330001},{name: "厦门", lat: 24479999, lon: 118080001},{name: "汕头", lat: 23399999, lon: 116680000},{name: "商丘", lat: 36119998, lon: 114370002},{name: "上海", lat: 31399999, lon: 121470001},{name: "邵阳", lat: 27229999, lon: 111470001},{name: "深圳", lat: 22549999, lon: 114099998},{name: "石家庄", lat: 38029998, lon: 114419998},{name: "太原", lat: 37779998, lon: 112550003},{name: "唐山", lat: 39669998, lon: 118150001},{name: "天津", lat: 39099998, lon: 117169998},{name: "潍坊", lat: 36700000, lon: 119080001},{name: "温州", lat: 30229999, lon: 120169998},{name: "乌鲁木齐", lat: 43779998, lon: 87620002},{name: "武汉", lat: 30620000, lon: 114129997},{name: "西安", lat: 34299999, lon: 108930000},{name: "西宁", lat: 36619998, lon: 101769996},{name: "信阳", lat: 32130001, lon: 114050003},{name: "徐州", lat: 34279998, lon: 117150001},{name: "盐城", lat: 34279998, lon: 117150001},{name: "宜宾", lat: 28799999, lon: 104599998},{name: "银川", lat: 38479999, lon: 106220001},{name: "长春", lat: 43900001, lon: 125220001},{name: "长沙", lat: 28229999, lon: 112870002},{name: "郑州", lat: 34720001, lon: 113650001},{name: "重庆", lat: 29520000, lon: 106480003},{name: "周口", lat: 33000000, lon: 114019996},{name: "驻马店", lat: 33000000, lon: 114019996}]}
+					
+	
+	var current_weather_template = ' <div class="s rbt">\
+	  <div class="obcontainer" style="padding-bottom:5px;">\
+ 	  <div>\
+ 	     <h3 class="r">中国{{city}}天气 {{date}}</h3>\
+ 	  </div>\
+	     <div>\
+	       <div>\
+	 	  <table style="padding:4px 0 0" cellspacing="0">\
+	 	  	<tbody>\
+	 	    	  <tr>\
+	 	  			<td style="vertical-align:center;padding-right:10px" rowspan="5">\
+	 	  				<img width="60" height="60" src="http://www.google.com/{{icon}}" border="0" style="margin-right:3px;vertical-align:top"></td>\
+	 	  				<td style="font-size:140%;white-space:nowrap;vertical-align:top;padding-right:15px;font-weight:bold" rowspan="2">当前温度: {{temp_c}}</td>\
+	 	  				<td style="width:5px;border-left:solid 1px #d8d8d8" rowspan="5"></td>\
+	 	  		   </tr>\
+	 	  			<tr>\
+	 	  				<td style="text-align:center" rowspan="3" colspan="2">\
+	 	  				</td>\
+	 	  			</tr>\
+	 	  			<tr>\
+	 	  			    <td style="white-space:nowrap;padding-right:15px;color:#666">{{condition}}</td>\
+	 	  			</tr>\
+	 	  			<tr>\
+	 	  			    <td style="white-space:nowrap;padding-right:15px;color:#666">{{wind_condition}}</td>\
+	 	  			</tr>\
+	 	  			<tr>\
+	 	  			    <td style="white-space:nowrap;padding-right:15px;vertical-align:top;color:#666">{{humidity}}</td>\
+	 	  			</tr>\
+	 	  	  </tbody>\
+	 	  	</table>\
+	       </div>\
+	     </div>\
+	   </div>\
+	 </div>';
+	 
+	 
+	 var weather_template = ' <div class="s rbt">\
+		  <div class="obcontainer" style="padding-bottom:5px;">\
+		     <div>\
+		       <div>\
+		 	  <table style="padding:4px 0 0" cellspacing="0">\
+		 	  	<tbody>\
+		 	    	  <tr>\
+		 	  			<td style="vertical-align:center;padding-right:10px" rowspan="5">\
+		 	  				<img src="http://www.google.com/{{icon}}" border="0" style="margin-right:3px;vertical-align:top"></td>\
+		 	  				<td style="font-size:140%;white-space:nowrap;vertical-align:top;padding-right:15px;font-weight:bold" rowspan="2"> {{high}}～{{low}}</td>\
+		 	  				<td style="width:5px;border-left:solid 1px #d8d8d8" rowspan="5"></td>\
+		 	  		   </tr>\
+		 	  			<tr>\
+		 	  				<td style="text-align:center" rowspan="3" colspan="2">\
+		 	  				</td>\
+		 	  			</tr>\
+		 	  			<tr>\
+		 	  			    <td style="white-space:nowrap;padding-right:15px;color:#666">{{condition}}</td>\
+		 	  			</tr>\
+		 	  			<tr>\
+		 	  			    <td style="white-space:nowrap;padding-right:15px;color:#666">{{day_of_week}}</td>\
+		 	  			</tr>\
+		 	  	  </tbody>\
+		 	  	</table>\
+		       </div>\
+		     </div>\
+		   </div>\
+		 </div>';
+
+		   
+	   Date.prototype.format = function(format)   
+	   {   
+	      var o = {   
+	        "M+" : this.getMonth()+1, //month   
+	        "d+" : this.getDate(),    //day   
+	        "h+" : this.getHours(),   //hour   
+	        "m+" : this.getMinutes(), //minute   
+	        "s+" : this.getSeconds(), //second   
+	        "q+" : Math.floor((this.getMonth()+3)/3), //quarter   
+	        "S" : this.getMilliseconds() //millisecond   
+	      }   
+	      if(/(y+)/.test(format)) format=format.replace(RegExp.$1,   
+	        (this.getFullYear()+"").substr(4 - RegExp.$1.length));   
+	      for(var k in o)if(new RegExp("("+ k +")").test(format))   
+	        format = format.replace(RegExp.$1,   
+	          RegExp.$1.length==1 ? o[k] :    
+	            ("00"+ o[k]).substr((""+ o[k]).length));   
+	      return format;   
+	 }  
+
+		   
+	
+
+	function replace_all(value,AFindText,ARepText){ 
+		var raRegExp = new RegExp(AFindText,"ig"); 
+		return value.replace(raRegExp,ARepText); 
+	}
+	
+	function templ(template,dic){
+		var t = template;
+		for(var k in dic){
+			t = replace_all(t,"{{"+k+"}}",dic[k]);
+		}
+		
+		return t;
+	}
+	
+	var city_dic = {};
+	function init_city(){
+		cities = city.cities;
+		for(var k in city.cities){
+			city_dic[cities[k].name] = cities[k]; 
+		}
+	}
+	
+	function valid_city(city){
+		obj = city_dic[city];
+		if(obj==null || obj=="undefined" || obj==""){
+			return false;
+		}
+		return true;
+	}
+	
+	function record_city(city){
+		if(!valid_city(city)){
+			alert("请输入城市名称，例如：北京")
+			return false;
+		}
+
+		obj = city_dic[city];
+		if(obj.name){
+		localStorage["city"] = obj.name;
+		localStorage["lon"] = obj.lon;
+		localStorage["lat"] = obj.lat;
+
+		load_weather();
+		$("#backbtn").click();}
+	}
+	
+	
+	function parse_data(data){
+		 var xml = $(data);
+		 
+		 xml.find("current_conditions").each(function() {
+			  x = this.childNodes;
+			  dic = {};
+			  for (i=0;i<x.length;i++)
+			  {
+				name = x[i].nodeName.toString();
+				dic[name] = x[i].getAttribute("data").toString();
+			  }
+
+			  if(localStorage["city"]!=null && localStorage["city"]!="undefined"){
+			  	dic["city"] = localStorage["city"];
+			  }
+			  else{
+			 	 dic["city"] = "北京";
+			  }
+			  
+			  dic["date"] = new Date().format("MM-dd hh:mm:ss");
+			  output = templ(current_weather_template,dic);
+			  
+			  $("#weather_content").append(output);
+		});
+
+		 xml.find("forecast_conditions").each(function() {
+			  x = this.childNodes;
+			  dic = {};
+			  for (i=0;i<x.length;i++)
+			  {
+				name = x[i].nodeName.toString();
+				dic[name] = x[i].getAttribute("data").toString();
+			  }
+			  
+			  output = templ(weather_template,dic);
+			  $("#weather_content").append(output);
+		});
+		 
+		$("#loader").hide();
+	}
+		 
+	function load_weather(){
+		$("#weather_content").html("");
+		$("#loader").show();
+		//parse_data(_xml);
+		//return;
+
+		if(localStorage["city"]!=null  && localStorage["city"]!="undefined"){			
+		   var url = weather_url+"&weather="+localStorage["city"];
+		}
+		else{
+			var url = weather_url+"&weather=Beijing"
+		}
+
+		$.get(url,function(data){
+			parse_data(data);
+		},"xml");
+	}
+	
+	$(document).ready(function(){   
+		
+		load_weather();
+		init_city();
+
+		$('#citybtn').click(function() {
+  			record_city($("#city_value").val());
+		});
+		
+	});
+	</script>
+	
+</head>
+
+<body style="margin:0 0 0 0;" >
+
+<!-- Start of first page: #one -->
+<div data-role="page" id="one" style="margin:0 0 0 0;background-image:url('2.jpg');background-repeat:no-repeat;">
+	<div data-role="content" style="margin:0 0 0 0;">
+		<p><a href="#two" data-role="button"  style="margin:0 0 0 0;">切换城市</a></p>	
+		<div id="loader" style="display:none"><img src="ajax-loader.png" /></div>
+		<p id="weather_content"></p>
+	</div><!-- /content -->
+	
+</div><!-- /page one -->
+
+
+<!-- Start of second page: #two -->
+<div data-role="page" id="two" data-theme="a">
+
+	<div data-role="header">
+		<h1>切换城市</h1>
+	</div><!-- /header -->
+
+	<div data-role="content" data-theme="a">
+		<form>
+			城市: <input id="city_value" type="text" maxlength=15 />
+			<input id="citybtn" type="button" value="确认"/>
+		</form>
+		<p><a id="backbtn" href="#one" data-role="button">返回</a></p>
+	</div><!-- /content -->
+	
+	<div data-role="footer">
+		<h4></h4>
+	</div><!-- /footer -->
+</div><!-- /page two -->
+
+
+
+</body>
+</html>
